@@ -16,27 +16,20 @@
   0%, 100% { opacity: 0.4; }
   50%       { opacity: 0.8; }
 }
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
 @keyframes shimmer {
   0%   { background-position: -200% center; }
   100% { background-position:  200% center; }
 }
 
-.animate-fade-up        { animation: fadeUp   0.7s ease both; }
-.animate-fade-in        { animation: fadeIn   0.6s ease both; }
-.animate-float          { animation: float    4s ease-in-out infinite; }
-.animate-pulse-slow     { animation: pulse-slow 3s ease-in-out infinite; }
-.animate-spin-slow      { animation: spin-slow  12s linear infinite; }
+.animate-fade-up    { animation: fadeUp      0.7s ease both; }
+.animate-fade-in    { animation: fadeIn      0.6s ease both; }
+.animate-float      { animation: float       4s ease-in-out infinite; }
+.animate-pulse-slow { animation: pulse-slow  3s ease-in-out infinite; }
 
-.delay-100  { animation-delay: 0.1s; }
-.delay-200  { animation-delay: 0.2s; }
-.delay-300  { animation-delay: 0.3s; }
-.delay-400  { animation-delay: 0.4s; }
-.delay-500  { animation-delay: 0.5s; }
-.delay-600  { animation-delay: 0.6s; }
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
 
 .shimmer-text {
   background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd, #7c3aed);
@@ -52,13 +45,6 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.5);
-}
-
-.glass-dark {
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.2);
 }
 
 .card-hover {
@@ -79,15 +65,11 @@
   box-shadow: 0 8px 30px rgba(124,58,237,0.5);
 }
 .btn-primary:active {
-  transform: translateY(0px) scale(0.98);
+  transform: scale(0.98);
 }
 
 .gradient-bg {
   background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 30%, #fce7f3 60%, #e0f2fe 100%);
-}
-
-.gradient-card {
-  background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(219,39,119,0.05));
 }
 
 html { scroll-behavior: smooth; }
