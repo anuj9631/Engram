@@ -572,7 +572,7 @@ export default function LandingPage() {
           </div>
           <div className="border-t border-gray-800 pt-6 flex flex-col md:flex-row justify-between items-center gap-2">
             <p className="text-xs">
-              © 2025 Engram. Built with ❤️ for second brains.
+              © 2026 Engram. Built with ❤️ for second brains.
             </p>
             <p className="text-xs">Made by a student, for students 🚀</p>
           </div>
