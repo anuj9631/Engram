@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
