@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import AiChatBot from "@/components/AiChatBot";
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -516,6 +517,7 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      <AiChatBot />
     </main>
   );
 }
