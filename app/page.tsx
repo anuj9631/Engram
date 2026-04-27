@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Navbar from "@/components/Navbar";
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -149,70 +150,7 @@ export default function LandingPage() {
   return (
     <main className="overflow-x-hidden">
       {/* ── NAVBAR ── */}
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "glass shadow-lg shadow-violet-100/50" : "bg-transparent"}`}
-      >
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🧠</span>
-            <span className="font-bold text-xl text-gray-900 tracking-tight">
-              Engram
-            </span>
-          </div>
-          <div className="hidden md:flex items-center gap-8">
-            {["Features", "How it works", "Testimonials"].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(/ /g, "-")}`}
-                className="text-sm text-gray-600 hover:text-violet-600 transition-colors font-medium"
-              >
-                {item}
-              </a>
-            ))}
-          </div>
-          <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="text-sm font-medium text-gray-600 hover:text-violet-600 px-4 py-2 transition-colors"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/dashboard"
-              className="btn-primary text-white text-sm font-bold px-5 py-2.5 rounded-xl"
-            >
-              Get started free →
-            </Link>
-          </div>
-          <button
-            className="md:hidden text-gray-700 text-xl"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            {menuOpen ? "✕" : "☰"}
-          </button>
-        </div>
-        {menuOpen && (
-          <div className="md:hidden glass border-t border-white/30 px-6 py-4 space-y-3">
-            {["Features", "How it works", "Testimonials"].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(/ /g, "-")}`}
-                className="block text-sm text-gray-700 py-1"
-                onClick={() => setMenuOpen(false)}
-              >
-                {item}
-              </a>
-            ))}
-            <Link
-              href="/dashboard"
-              className="block btn-primary text-white text-sm font-bold px-5 py-2.5 rounded-xl text-center mt-2"
-            >
-              Get started free →
-            </Link>
-          </div>
-        )}
-      </nav>
-
+      <Navbar />
       {/* ── HERO ── */}
       <section className="relative min-h-screen gradient-bg flex items-center overflow-hidden pt-16">
         <div className="absolute top-20 left-10 w-72 h-72 bg-violet-300/30 rounded-full blur-3xl animate-pulse-slow" />
