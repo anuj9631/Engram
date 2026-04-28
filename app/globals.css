@@ -1,12 +1,9 @@
 @import "tailwindcss";
 
+/* ── Animations ── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(32px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
 }
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -20,17 +17,21 @@
   0%   { background-position: -200% center; }
   100% { background-position:  200% center; }
 }
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40%            { transform: translateY(-6px); }
+}
 
-.animate-fade-up    { animation: fadeUp      0.7s ease both; }
-.animate-fade-in    { animation: fadeIn      0.6s ease both; }
-.animate-float      { animation: float       4s ease-in-out infinite; }
-.animate-pulse-slow { animation: pulse-slow  3s ease-in-out infinite; }
+.animate-fade-up    { animation: fadeUp     0.7s ease both; }
+.animate-float      { animation: float      4s ease-in-out infinite; }
+.animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
 
 .delay-100 { animation-delay: 0.1s; }
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }
 .delay-400 { animation-delay: 0.4s; }
 
+/* ── Shimmer text ── */
 .shimmer-text {
   background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd, #7c3aed);
   background-size: 200% auto;
@@ -40,13 +41,19 @@
   animation: shimmer 3s linear infinite;
 }
 
+/* ── Glassmorphism ── */
 .glass {
   background: rgba(255,255,255,0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.5);
 }
+.dark .glass {
+  background: rgba(15,10,30,0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+}
 
+/* ── Card hover ── */
 .card-hover {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -55,10 +62,12 @@
   box-shadow: 0 20px 60px rgba(124,58,237,0.15);
 }
 
+/* ── Primary button ── */
 .btn-primary {
   background: linear-gradient(135deg, #7c3aed, #6d28d9);
   transition: all 0.3s ease;
   box-shadow: 0 4px 20px rgba(124,58,237,0.35);
+  cursor: pointer;
 }
 .btn-primary:hover {
   transform: translateY(-2px);
@@ -68,8 +77,81 @@
   transform: scale(0.98);
 }
 
+/* ── Light mode background ── */
 .gradient-bg {
   background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 30%, #fce7f3 60%, #e0f2fe 100%);
+}
+
+/* ── Dark mode background ── */
+.dark .gradient-bg {
+  background: linear-gradient(135deg, #0f0a1e 0%, #1a0f35 30%, #1e0f2e 60%, #0a1628 100%);
+}
+
+/* ── Dark mode body ── */
+.dark body {
+  background: #0f0a1e;
+  color: #e2e8f0;
+}
+
+/* ── Dark mode card overrides ── */
+.dark .bg-white {
+  background-color: #1a1625 !important;
+}
+.dark .bg-gray-50 {
+  background-color: #130f20 !important;
+}
+.dark .bg-gray-950 {
+  background-color: #080510 !important;
+}
+.dark .text-gray-900 {
+  color: #f1f5f9 !important;
+}
+.dark .text-gray-700 {
+  color: #cbd5e1 !important;
+}
+.dark .text-gray-600 {
+  color: #94a3b8 !important;
+}
+.dark .text-gray-500 {
+  color: #64748b !important;
+}
+.dark .text-gray-400 {
+  color: #475569 !important;
+}
+.dark .border-gray-100 {
+  border-color: #2d2540 !important;
+}
+.dark .border-gray-200 {
+  border-color: #3d3155 !important;
+}
+
+/* ── Dark mode violet accents ── */
+.dark .bg-violet-50 {
+  background-color: #1e1438 !important;
+}
+.dark .bg-violet-100 {
+  background-color: #2a1a4e !important;
+}
+.dark .bg-pink-50 {
+  background-color: #2a1025 !important;
+}
+.dark .bg-amber-50 {
+  background-color: #2a1f0a !important;
+}
+.dark .bg-sky-50 {
+  background-color: #0a1628 !important;
+}
+.dark .bg-emerald-50 {
+  background-color: #0a2018 !important;
+}
+.dark .bg-neutral-50 {
+  background-color: #130f20 !important;
+}
+.dark .border-violet-100 {
+  border-color: #3d2a6e !important;
+}
+.dark .border-violet-200 {
+  border-color: #4c3580 !important;
 }
 
 html { scroll-behavior: smooth; }
