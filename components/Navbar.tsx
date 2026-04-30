@@ -4,6 +4,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import SignInModal from "@/components/SignInModal";
 import ThemeToggle from "@/components/ThemeToggle";
+import CommandPalette from "@/components/CommandPalette";
 
 const LINKS = [
   { label: "Features", href: "#features" },
@@ -62,6 +63,7 @@ export default function Navbar() {
             gap: 16,
           }}
         >
+          {/* Logo */}
           <Link
             href="/"
             style={{ textDecoration: "none", color: "inherit", flexShrink: 0 }}
@@ -69,6 +71,7 @@ export default function Navbar() {
             <Logo size="md" />
           </Link>
 
+          {/* Desktop nav links */}
           <div
             style={{ display: "flex", alignItems: "center", gap: 4 }}
             className="hide-mobile"
@@ -101,11 +104,18 @@ export default function Navbar() {
             ))}
           </div>
 
+          {/* Desktop right side */}
           <div
             style={{ display: "flex", alignItems: "center", gap: 10 }}
             className="hide-mobile"
           >
+            {/* Command palette trigger */}
+            <CommandPalette />
+
+            {/* Theme toggle */}
             <ThemeToggle />
+
+            {/* Sign in */}
             <button
               onClick={() => setShowAuth(true)}
               style={{
@@ -131,6 +141,8 @@ export default function Navbar() {
             >
               Sign in
             </button>
+
+            {/* CTA */}
             <button
               onClick={() => setShowAuth(true)}
               style={{
@@ -161,6 +173,7 @@ export default function Navbar() {
             </button>
           </div>
 
+          {/* Mobile right side */}
           <div
             style={{ display: "flex", alignItems: "center", gap: 8 }}
             className="show-mobile"
@@ -225,6 +238,7 @@ export default function Navbar() {
           </div>
         </div>
 
+        {/* Mobile dropdown */}
         {menuOpen && (
           <div
             style={{
@@ -234,6 +248,11 @@ export default function Navbar() {
               padding: "16px 24px 24px",
             }}
           >
+            {/* Mobile search */}
+            <div style={{ marginBottom: 12 }}>
+              <CommandPalette />
+            </div>
+
             {LINKS.map((link) => (
               <a
                 key={link.label}
@@ -252,6 +271,7 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
+
             <button
               onClick={() => {
                 setMenuOpen(false);
