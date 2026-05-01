@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { SourceType } from "@/lib/supabase";
-
+import VoiceInput from "@/components/VoiceInput";
 const TYPES: {
   value: SourceType;
   emoji: string;
