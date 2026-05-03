@@ -5,6 +5,7 @@ import NoteInput from "@/components/NoteInput";
 import AskBar from "@/components/AskBar";
 import MemoryList from "@/components/MemoryList";
 import { Memory } from "@/lib/supabase";
+import MemoryAnalytics from "@/components/MemoryAnalytics";
 
 const USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID ?? "";
 type Tab = "memories" | "ask";
