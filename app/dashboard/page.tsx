@@ -4,11 +4,17 @@ import Link from "next/link";
 import NoteInput from "@/components/NoteInput";
 import AskBar from "@/components/AskBar";
 import MemoryList from "@/components/MemoryList";
-import { Memory } from "@/lib/supabase";
 import MemoryAnalytics from "@/components/MemoryAnalytics";
+import { Memory } from "@/lib/supabase";
 
 const USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID ?? "";
-type Tab = "memories" | "ask";
+type Tab = "memories" | "ask" | "analytics";
+
+const NAV = [
+  { id: "memories", icon: "📚", label: "All memories" },
+  { id: "ask", icon: "✨", label: "Ask AI" },
+  { id: "analytics", icon: "📊", label: "Analytics" },
+];
 
 export default function Dashboard() {
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -90,10 +96,7 @@ export default function Dashboard() {
 
           {/* Nav */}
           <nav className="space-y-1 flex-1">
-            {[
-              { id: "memories", icon: "📚", label: "All memories" },
-              { id: "ask", icon: "✨", label: "Ask AI" },
-            ].map((item) => (
+            {NAV.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setTab(item.id as Tab)}
@@ -112,7 +115,7 @@ export default function Dashboard() {
             href="/"
             className="text-xs text-gray-400 hover:text-violet-500 transition-colors mt-4 flex items-center gap-1"
           >
-            ← Back to home
+            Back to home
           </Link>
         </aside>
 
@@ -127,24 +130,28 @@ export default function Dashboard() {
               </div>
               <div className="hidden lg:block">
                 <h1 className="font-bold text-gray-900">
-                  {tab === "ask" ? "✨ Ask AI" : "📚 Memories"}
+                  {tab === "ask"
+                    ? "✨ Ask AI"
+                    : tab === "analytics"
+                      ? "📊 Analytics"
+                      : "📚 Memories"}
                 </h1>
               </div>
             </div>
 
             {/* Mobile tab switcher */}
             <div className="lg:hidden flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
-              {(["memories", "ask"] as Tab[]).map((t) => (
+              {NAV.map((item) => (
                 <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    tab === t
+                  key={item.id}
+                  onClick={() => setTab(item.id as Tab)}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    tab === item.id
                       ? "bg-white text-gray-900 shadow-sm"
                       : "text-gray-500"
                   }`}
                 >
-                  {t === "memories" ? "📚" : "✨"} {t}
+                  {item.icon}
                 </button>
               ))}
             </div>
@@ -162,10 +169,13 @@ export default function Dashboard() {
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+              {/* Note input — always visible */}
               <NoteInput userId={USER_ID} onSaved={fetchMemories} />
 
+              {/* Ask AI tab */}
               {tab === "ask" && <AskBar userId={USER_ID} />}
 
+              {/* Memories tab */}
               {tab === "memories" &&
                 (loading ? (
                   <div className="flex items-center justify-center gap-3 py-20">
@@ -180,6 +190,19 @@ export default function Dashboard() {
                     userId={USER_ID}
                     onDeleted={fetchMemories}
                   />
+                ))}
+
+              {/* Analytics tab */}
+              {tab === "analytics" &&
+                (loading ? (
+                  <div className="flex items-center justify-center gap-3 py-20">
+                    <div className="w-5 h-5 border-2 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
+                    <span className="text-sm text-gray-400">
+                      Loading analytics…
+                    </span>
+                  </div>
+                ) : (
+                  <MemoryAnalytics memories={memories} />
                 ))}
             </div>
           </div>
