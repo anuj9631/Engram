@@ -5,6 +5,7 @@ import NoteInput from "@/components/NoteInput";
 import AskBar from "@/components/AskBar";
 import MemoryList from "@/components/MemoryList";
 import MemoryAnalytics from "@/components/MemoryAnalytics";
+import Onboarding from "@/components/Onboarding";
 import { Memory } from "@/lib/supabase";
 
 const USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID ?? "";
@@ -20,6 +21,19 @@ export default function Dashboard() {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("memories");
+  const [showOnboard, setShowOnboard] = useState(false);
+
+  // Show onboarding once per device
+  useEffect(() => {
+    const done = localStorage.getItem("engram_onboarded");
+    if (!done) setShowOnboard(true);
+  }, []);
+
+  const finishOnboarding = () => {
+    localStorage.setItem("engram_onboarded", "true");
+    setShowOnboard(false);
+    fetchMemories();
+  };
 
   const fetchMemories = useCallback(async () => {
     if (!USER_ID) return;
@@ -70,8 +84,11 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Onboarding overlay */}
+      {showOnboard && <Onboarding userId={USER_ID} onDone={finishOnboarding} />}
+
       <div className="flex h-screen overflow-hidden">
-        {/* ── Sidebar ── */}
+        {/* Sidebar */}
         <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-100 p-5 shrink-0">
           <div className="flex items-center gap-2 mb-8">
             <span className="text-2xl">🧠</span>
@@ -80,7 +97,6 @@ export default function Dashboard() {
             </span>
           </div>
 
-          {/* Stats */}
           <div className="grid grid-cols-2 gap-2 mb-6">
             <div className="bg-violet-50 rounded-2xl p-3 text-center">
               <div className="text-xl font-black text-violet-600">
@@ -94,7 +110,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Nav */}
           <nav className="space-y-1 flex-1">
             {NAV.map((item) => (
               <button
@@ -111,17 +126,24 @@ export default function Dashboard() {
             ))}
           </nav>
 
+          {/* Replay onboarding */}
+          <button
+            onClick={() => setShowOnboard(true)}
+            className="text-xs text-gray-400 hover:text-violet-500 transition-colors mt-2 flex items-center gap-1"
+          >
+            🚀 Replay onboarding
+          </button>
+
           <Link
             href="/"
-            className="text-xs text-gray-400 hover:text-violet-500 transition-colors mt-4 flex items-center gap-1"
+            className="text-xs text-gray-400 hover:text-violet-500 transition-colors mt-2 flex items-center gap-1"
           >
             Back to home
           </Link>
         </aside>
 
-        {/* ── Main content ── */}
+        {/* Main content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top bar */}
           <header className="bg-white border-b border-gray-100 px-6 h-14 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
               <div className="lg:hidden flex items-center gap-2">
@@ -139,7 +161,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Mobile tab switcher */}
             <div className="lg:hidden flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
               {NAV.map((item) => (
                 <button
@@ -166,16 +187,12 @@ export default function Dashboard() {
             </div>
           </header>
 
-          {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
-              {/* Note input — always visible */}
               <NoteInput userId={USER_ID} onSaved={fetchMemories} />
 
-              {/* Ask AI tab */}
               {tab === "ask" && <AskBar userId={USER_ID} />}
 
-              {/* Memories tab */}
               {tab === "memories" &&
                 (loading ? (
                   <div className="flex items-center justify-center gap-3 py-20">
@@ -192,7 +209,6 @@ export default function Dashboard() {
                   />
                 ))}
 
-              {/* Analytics tab */}
               {tab === "analytics" &&
                 (loading ? (
                   <div className="flex items-center justify-center gap-3 py-20">
