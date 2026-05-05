@@ -6,15 +6,17 @@ import AskBar from "@/components/AskBar";
 import MemoryList from "@/components/MemoryList";
 import MemoryAnalytics from "@/components/MemoryAnalytics";
 import Onboarding from "@/components/Onboarding";
+import ProfilePage from "@/components/ProfilePage";
 import { Memory } from "@/lib/supabase";
 
 const USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID ?? "";
-type Tab = "memories" | "ask" | "analytics";
+type Tab = "memories" | "ask" | "analytics" | "profile";
 
 const NAV = [
   { id: "memories", icon: "📚", label: "All memories" },
   { id: "ask", icon: "✨", label: "Ask AI" },
   { id: "analytics", icon: "📊", label: "Analytics" },
+  { id: "profile", icon: "👤", label: "Profile" },
 ];
 
 export default function Dashboard() {
@@ -23,7 +25,6 @@ export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("memories");
   const [showOnboard, setShowOnboard] = useState(false);
 
-  // Show onboarding once per device
   useEffect(() => {
     const done = localStorage.getItem("engram_onboarded");
     if (!done) setShowOnboard(true);
@@ -82,9 +83,15 @@ export default function Dashboard() {
   const ideas = memories.filter((m) => m.source_type === "idea").length;
   const notes = memories.filter((m) => m.source_type === "note").length;
 
+  const tabTitle: Record<Tab, string> = {
+    memories: "📚 Memories",
+    ask: "✨ Ask AI",
+    analytics: "📊 Analytics",
+    profile: "👤 Profile",
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Onboarding overlay */}
       {showOnboard && <Onboarding userId={USER_ID} onDone={finishOnboarding} />}
 
       <div className="flex h-screen overflow-hidden">
@@ -126,23 +133,21 @@ export default function Dashboard() {
             ))}
           </nav>
 
-          {/* Replay onboarding */}
           <button
             onClick={() => setShowOnboard(true)}
-            className="text-xs text-gray-400 hover:text-violet-500 transition-colors mt-2 flex items-center gap-1"
+            className="text-xs text-gray-400 hover:text-violet-500 transition-colors mt-2 text-left"
           >
             🚀 Replay onboarding
           </button>
-
           <Link
             href="/"
-            className="text-xs text-gray-400 hover:text-violet-500 transition-colors mt-2 flex items-center gap-1"
+            className="text-xs text-gray-400 hover:text-violet-500 transition-colors mt-2"
           >
             Back to home
           </Link>
         </aside>
 
-        {/* Main content */}
+        {/* Main */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <header className="bg-white border-b border-gray-100 px-6 h-14 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
@@ -151,13 +156,7 @@ export default function Dashboard() {
                 <span className="font-black text-gray-900">Engram</span>
               </div>
               <div className="hidden lg:block">
-                <h1 className="font-bold text-gray-900">
-                  {tab === "ask"
-                    ? "✨ Ask AI"
-                    : tab === "analytics"
-                      ? "📊 Analytics"
-                      : "📚 Memories"}
-                </h1>
+                <h1 className="font-bold text-gray-900">{tabTitle[tab]}</h1>
               </div>
             </div>
 
@@ -181,15 +180,21 @@ export default function Dashboard() {
               <span className="text-xs text-gray-400 hidden sm:block">
                 {notes} notes · {ideas} ideas
               </span>
-              <div className="w-8 h-8 bg-gradient-to-br from-violet-400 to-purple-600 rounded-xl flex items-center justify-center text-white text-xs font-bold">
+              <button
+                onClick={() => setTab("profile")}
+                className="w-8 h-8 bg-gradient-to-br from-violet-400 to-purple-600 rounded-xl flex items-center justify-center text-white text-xs font-bold hover:scale-105 transition-transform"
+              >
                 Y
-              </div>
+              </button>
             </div>
           </header>
 
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
-              <NoteInput userId={USER_ID} onSaved={fetchMemories} />
+              {/* Note input — always visible except on profile tab */}
+              {tab !== "profile" && (
+                <NoteInput userId={USER_ID} onSaved={fetchMemories} />
+              )}
 
               {tab === "ask" && <AskBar userId={USER_ID} />}
 
@@ -220,6 +225,10 @@ export default function Dashboard() {
                 ) : (
                   <MemoryAnalytics memories={memories} />
                 ))}
+
+              {tab === "profile" && (
+                <ProfilePage memories={memories} userId={USER_ID} />
+              )}
             </div>
           </div>
         </div>
