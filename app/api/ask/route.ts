@@ -12,12 +12,14 @@ export async function POST(req: NextRequest) {
   }
 
   // Step 1 — Embed the question
-  let queryEmbedding: number[]
-  try {
-    queryEmbedding = await generateEmbedding(question)
-  } catch (e: any) {
-    return NextResponse.json({ error: 'Embedding failed: ' + e.message }, { status: 500 })
-  }
+ // Step 1 — Embed the question
+const queryEmbedding = await generateEmbedding(question)
+if (!queryEmbedding) {
+  return NextResponse.json({
+    answer: "I couldn't search your memories right now — the embedding service is unavailable. Please try again in a moment.",
+    sources: [],
+  })
+}
 
   // Step 2 — Semantic search over memories
   const { data: matches, error: searchError } = await supabaseAdmin.rpc(
