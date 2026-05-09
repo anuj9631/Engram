@@ -130,7 +130,10 @@ export default function Dashboard() {
       <div className="flex h-screen overflow-hidden">
         {/* Sidebar */}
         <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-100 p-5 shrink-0">
-          <div className="flex items-center gap-2 mb-8">
+          <Link
+            href="/"
+            className="flex items-center gap-2 mb-8 hover:opacity-80 transition-opacity"
+          >
             <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
               <rect width="40" height="40" rx="10" fill="#7c3aed" />
               <rect x="10" y="10" width="18" height="4" rx="2" fill="white" />
@@ -152,7 +155,7 @@ export default function Dashboard() {
             <span className="font-black text-lg text-gray-900 tracking-tight">
               Engram
             </span>
-          </div>
+          </Link>
 
           {/* User info */}
           <div className="flex items-center gap-3 mb-6 p-3 bg-violet-50 rounded-2xl">
@@ -240,7 +243,10 @@ export default function Dashboard() {
         <div className="flex-1 flex flex-col overflow-hidden">
           <header className="bg-white border-b border-gray-100 px-6 h-14 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
-              <div className="lg:hidden flex items-center gap-2">
+              <Link
+                href="/"
+                className="lg:hidden flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
                 <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
                   <rect width="40" height="40" rx="10" fill="#7c3aed" />
                   <rect
@@ -281,7 +287,7 @@ export default function Dashboard() {
                   <circle cx="28" cy="28" r="2.5" fill="#c4b5fd" />
                 </svg>
                 <span className="font-black text-gray-900">Engram</span>
-              </div>
+              </Link>
               <div className="hidden lg:block">
                 <h1 className="font-bold text-gray-900">{tabTitle[tab]}</h1>
               </div>
