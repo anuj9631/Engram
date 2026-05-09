@@ -34,8 +34,10 @@ export default function Navbar() {
       } = await supabase.auth.getSession();
       if (session?.user) {
         const email = session.user.email ?? "";
-        const initials = email ? email[0].toUpperCase() : "U";
-        setUser({ email, initials });
+        const name =
+          session.user.user_metadata?.full_name || email.split("@")[0];
+        const initials = name ? name[0].toUpperCase() : "U";
+        setUser({ email: name, initials });
       }
     };
     checkUser();
@@ -46,8 +48,10 @@ export default function Navbar() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         const email = session.user.email ?? "";
-        const initials = email ? email[0].toUpperCase() : "U";
-        setUser({ email, initials });
+        const name =
+          session.user.user_metadata?.full_name || email.split("@")[0];
+        const initials = name ? name[0].toUpperCase() : "U";
+        setUser({ email: name, initials });
       } else {
         setUser(null);
       }
