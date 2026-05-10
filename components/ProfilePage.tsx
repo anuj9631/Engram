@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { Memory } from "@/lib/supabase";
+import { useState, useEffect } from "react";
+import { Memory, supabase } from "@/lib/supabase";
 
 const DOMAINS = [
   { id: "dev", emoji: "💻", label: "Development" },
@@ -38,7 +38,40 @@ export default function ProfilePage({ memories, userId }: Props) {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [tab, setTab] = useState<"profile" | "export">("profile");
+
+  // Load profile from Supabase on mount
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!userId) return;
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("full_name, role, bio, goals, strengths, domains")
+          .eq("id", userId)
+          .single();
+
+        if (data) {
+          setProfile({
+            name: data.full_name || "",
+            role: data.role || "",
+            bio: data.bio || "",
+            goals: data.goals || "",
+            strengths: data.strengths || "",
+            domains: data.domains || [],
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load profile:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProfile();
+  }, [userId]);
 
   const update = (key: keyof Profile, value: string) => {
     setProfile((prev) => ({ ...prev, [key]: value }));
@@ -55,17 +88,32 @@ export default function ProfilePage({ memories, userId }: Props) {
     setSaved(false);
   };
 
+  // Save profile to Supabase permanently
   const handleSave = async () => {
     setSaving(true);
-    // Save to localStorage for now — replace with Supabase profiles table later
-    localStorage.setItem("engram_profile", JSON.stringify(profile));
-    await new Promise((r) => setTimeout(r, 600));
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setError("");
+    try {
+      const { error } = await supabase.from("profiles").upsert({
+        id: userId,
+        full_name: profile.name,
+        role: profile.role,
+        bio: profile.bio,
+        goals: profile.goals,
+        strengths: profile.strengths,
+        domains: profile.domains,
+      });
+
+      if (error) throw error;
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e: any) {
+      setError(e.message || "Failed to save profile");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  // Export memories as JSON
   const exportJSON = () => {
     const data = JSON.stringify(
       { profile, memories, exportedAt: new Date().toISOString() },
@@ -81,7 +129,6 @@ export default function ProfilePage({ memories, userId }: Props) {
     URL.revokeObjectURL(url);
   };
 
-  // Export memories as Markdown
   const exportMarkdown = () => {
     const lines = [
       "# Engram Memory Export",
@@ -117,15 +164,43 @@ export default function ProfilePage({ memories, userId }: Props) {
     URL.revokeObjectURL(url);
   };
 
-  // Compute avatar initials
   const initials = profile.name
     ? profile.name
         .split(" ")
-        .map((w) => w[0])
+        .map((w: string) => w[0])
         .join("")
         .toUpperCase()
         .slice(0, 2)
     : "ME";
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "60px 0",
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            width: 20,
+            height: 20,
+            border: "2px solid #ede9fe",
+            borderTop: "2px solid #7c3aed",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }}
+        />
+        <span style={{ fontSize: 14, color: "#94a3b8" }}>
+          Loading your profile...
+        </span>
+        <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -140,7 +215,6 @@ export default function ProfilePage({ memories, userId }: Props) {
           gap: 20,
         }}
       >
-        {/* Avatar */}
         <div
           style={{
             width: 72,
@@ -155,7 +229,6 @@ export default function ProfilePage({ memories, userId }: Props) {
             fontWeight: 800,
             color: "white",
             flexShrink: 0,
-            letterSpacing: "-0.02em",
           }}
         >
           {initials}
@@ -236,7 +309,6 @@ export default function ProfilePage({ memories, userId }: Props) {
       {/* Profile tab */}
       {tab === "profile" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {/* Name + role row */}
           <div
             style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
           >
@@ -310,7 +382,6 @@ export default function ProfilePage({ memories, userId }: Props) {
             </div>
           </div>
 
-          {/* Bio */}
           <div>
             <label
               style={{
@@ -328,7 +399,7 @@ export default function ProfilePage({ memories, userId }: Props) {
             <textarea
               value={profile.bio}
               onChange={(e) => update("bio", e.target.value)}
-              placeholder="Tell Engram about yourself — what you're building, studying, or working on..."
+              placeholder="Tell Engram about yourself..."
               rows={3}
               style={{
                 width: "100%",
@@ -349,7 +420,6 @@ export default function ProfilePage({ memories, userId }: Props) {
             />
           </div>
 
-          {/* Goals */}
           <div>
             <label
               style={{
@@ -367,7 +437,7 @@ export default function ProfilePage({ memories, userId }: Props) {
             <textarea
               value={profile.goals}
               onChange={(e) => update("goals", e.target.value)}
-              placeholder="Get a job at a top tech company, build an AI startup, publish research..."
+              placeholder="Get a job at a top tech company, build an AI startup..."
               rows={2}
               style={{
                 width: "100%",
@@ -388,7 +458,6 @@ export default function ProfilePage({ memories, userId }: Props) {
             />
           </div>
 
-          {/* Strengths */}
           <div>
             <label
               style={{
@@ -406,7 +475,7 @@ export default function ProfilePage({ memories, userId }: Props) {
             <input
               value={profile.strengths}
               onChange={(e) => update("strengths", e.target.value)}
-              placeholder="Python, React, System Design, Communication..."
+              placeholder="Python, React, System Design..."
               style={{
                 width: "100%",
                 padding: "11px 14px",
@@ -424,7 +493,6 @@ export default function ProfilePage({ memories, userId }: Props) {
             />
           </div>
 
-          {/* Domains */}
           <div>
             <label
               style={{
@@ -483,7 +551,21 @@ export default function ProfilePage({ memories, userId }: Props) {
             </div>
           </div>
 
-          {/* Save button */}
+          {error && (
+            <div
+              style={{
+                padding: "10px 14px",
+                background: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: 12,
+                fontSize: 13,
+                color: "#dc2626",
+              }}
+            >
+              ⚠ {error}
+            </div>
+          )}
+
           <button
             onClick={handleSave}
             disabled={saving}
@@ -520,11 +602,11 @@ export default function ProfilePage({ memories, userId }: Props) {
                     animation: "spin 0.8s linear infinite",
                   }}
                 />
-                Saving profile...
+                Saving...
               </>
             ) : saved ? (
               <>
-                <span>✓</span> Profile saved!
+                <span>✓</span> Profile saved to cloud!
               </>
             ) : (
               <>
@@ -532,6 +614,17 @@ export default function ProfilePage({ memories, userId }: Props) {
               </>
             )}
           </button>
+
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: 12,
+              color: "#94a3b8",
+              marginTop: -8,
+            }}
+          >
+            Saved permanently to your Supabase account
+          </p>
         </div>
       )}
 
@@ -565,157 +658,103 @@ export default function ProfilePage({ memories, userId }: Props) {
             </div>
           </div>
 
-          {/* JSON export */}
-          <div
-            style={{
-              background: "#fff",
-              border: "1.5px solid #f1f5f9",
-              borderRadius: 20,
-              padding: "20px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+          {[
+            {
+              icon: "📦",
+              title: "Export as JSON",
+              desc: "Full export with all memory data, tags, timestamps, and profile. Perfect for backup.",
+              color: "#fef3c7",
+              fn: exportJSON,
+              file: ".json",
+              hover: "#7c3aed",
+            },
+            {
+              icon: "📝",
+              title: "Export as Markdown",
+              desc: "All memories formatted as readable Markdown. Great for Obsidian or Notion import.",
+              color: "#f0fdf4",
+              fn: exportMarkdown,
+              file: ".md",
+              hover: "#10b981",
+            },
+          ].map((item) => (
+            <div
+              key={item.title}
+              style={{
+                background: "#fff",
+                border: "1.5px solid #f1f5f9",
+                borderRadius: 20,
+                padding: "20px",
+              }}
+            >
               <div
-                style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 12,
-                  background: "#fef3c7",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 20,
-                  flexShrink: 0,
-                }}
+                style={{ display: "flex", alignItems: "flex-start", gap: 14 }}
               >
-                📦
-              </div>
-              <div style={{ flex: 1 }}>
                 <div
                   style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: "#0f172a",
-                    marginBottom: 4,
-                  }}
-                >
-                  Export as JSON
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "#64748b",
-                    marginBottom: 14,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  Full export with all memory data, tags, timestamps, and
-                  profile. Perfect for backup or importing elsewhere.
-                </div>
-                <button
-                  onClick={exportJSON}
-                  style={{
-                    padding: "9px 18px",
+                    width: 42,
+                    height: 42,
                     borderRadius: 12,
-                    border: "1.5px solid #e2e8f0",
-                    background: "#fff",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "#374151",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "#7c3aed";
-                    e.currentTarget.style.color = "#7c3aed";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "#e2e8f0";
-                    e.currentTarget.style.color = "#374151";
+                    background: item.color,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 20,
+                    flexShrink: 0,
                   }}
                 >
-                  Download .json
-                </button>
+                  {item.icon}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: "#0f172a",
+                      marginBottom: 4,
+                    }}
+                  >
+                    {item.title}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: "#64748b",
+                      marginBottom: 14,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {item.desc}
+                  </div>
+                  <button
+                    onClick={item.fn}
+                    style={{
+                      padding: "9px 18px",
+                      borderRadius: 12,
+                      border: "1.5px solid #e2e8f0",
+                      background: "#fff",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "#374151",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = item.hover;
+                      e.currentTarget.style.color = item.hover;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "#e2e8f0";
+                      e.currentTarget.style.color = "#374151";
+                    }}
+                  >
+                    Download {item.file}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          ))}
 
-          {/* Markdown export */}
-          <div
-            style={{
-              background: "#fff",
-              border: "1.5px solid #f1f5f9",
-              borderRadius: 20,
-              padding: "20px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-              <div
-                style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 12,
-                  background: "#f0fdf4",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 20,
-                  flexShrink: 0,
-                }}
-              >
-                📝
-              </div>
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: "#0f172a",
-                    marginBottom: 4,
-                  }}
-                >
-                  Export as Markdown
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "#64748b",
-                    marginBottom: 14,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  All memories formatted as readable Markdown. Great for
-                  Obsidian, Notion import, or reading offline.
-                </div>
-                <button
-                  onClick={exportMarkdown}
-                  style={{
-                    padding: "9px 18px",
-                    borderRadius: 12,
-                    border: "1.5px solid #e2e8f0",
-                    background: "#fff",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "#374151",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "#10b981";
-                    e.currentTarget.style.color = "#10b981";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "#e2e8f0";
-                    e.currentTarget.style.color = "#374151";
-                  }}
-                >
-                  Download .md
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Danger zone */}
           <div
             style={{
               background: "#fff",
@@ -735,11 +774,11 @@ export default function ProfilePage({ memories, userId }: Props) {
               Danger zone
             </div>
             <div style={{ fontSize: 13, color: "#64748b", marginBottom: 14 }}>
-              Clear onboarding and profile data stored locally on this device.
+              Clear onboarding state stored locally on this device.
             </div>
             <button
               onClick={() => {
-                if (confirm("Clear all local data? This cannot be undone.")) {
+                if (confirm("Clear local data?")) {
                   localStorage.removeItem("engram_profile");
                   localStorage.removeItem("engram_onboarded");
                   localStorage.removeItem("engram_first_saved");
@@ -755,7 +794,6 @@ export default function ProfilePage({ memories, userId }: Props) {
                 fontWeight: 600,
                 color: "#dc2626",
                 cursor: "pointer",
-                transition: "all 0.15s",
               }}
             >
               Clear local data
@@ -764,12 +802,7 @@ export default function ProfilePage({ memories, userId }: Props) {
         </div>
       )}
 
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-      `}</style>
+      <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
     </div>
   );
 }
