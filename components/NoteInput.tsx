@@ -2,7 +2,6 @@
 import { useState, useRef } from "react";
 import { SourceType } from "@/lib/supabase";
 import VoiceInput from "@/components/VoiceInput";
-import confetti from "canvas-confetti";
 
 const TYPES: {
   value: SourceType;
@@ -30,53 +29,52 @@ const TYPES: {
   },
 ];
 
-function fireConfetti(buttonEl: HTMLButtonElement | null) {
-  // Get button position for origin point
-  const rect = buttonEl?.getBoundingClientRect();
-  const x = rect ? (rect.left + rect.width / 2) / window.innerWidth : 0.5;
-  const y = rect ? (rect.top + rect.height / 2) / window.innerHeight : 0.6;
+async function fireConfetti(btn: HTMLButtonElement | null) {
+  try {
+    const confetti = (await import("canvas-confetti")).default;
+    const rect = btn?.getBoundingClientRect();
+    const x = rect ? (rect.left + rect.width / 2) / window.innerWidth : 0.5;
+    const y = rect ? (rect.top + rect.height / 2) / window.innerHeight : 0.6;
 
-  // First burst — big
-  confetti({
-    particleCount: 80,
-    spread: 70,
-    origin: { x, y },
-    colors: ["#7c3aed", "#a78bfa", "#c4b5fd", "#4f46e5", "#818cf8", "#fff"],
-    scalar: 1.1,
-    ticks: 200,
-  });
-
-  // Second burst — trails up
-  setTimeout(() => {
     confetti({
-      particleCount: 40,
-      angle: 60,
-      spread: 55,
-      origin: { x: x - 0.1, y },
-      colors: ["#7c3aed", "#ec4899", "#f59e0b"],
-      scalar: 0.9,
+      particleCount: 80,
+      spread: 70,
+      origin: { x, y },
+      colors: ["#7c3aed", "#a78bfa", "#c4b5fd", "#4f46e5", "#818cf8", "#fff"],
+      scalar: 1.1,
+      ticks: 200,
     });
-    confetti({
-      particleCount: 40,
-      angle: 120,
-      spread: 55,
-      origin: { x: x + 0.1, y },
-      colors: ["#7c3aed", "#06b6d4", "#10b981"],
-      scalar: 0.9,
-    });
-  }, 150);
-
-  // Third burst — sparkle
-  setTimeout(() => {
-    confetti({
-      particleCount: 30,
-      spread: 100,
-      origin: { x, y: y - 0.1 },
-      colors: ["#ffffff", "#c4b5fd", "#a78bfa"],
-      scalar: 0.6,
-      ticks: 150,
-    });
-  }, 300);
+    setTimeout(() => {
+      confetti({
+        particleCount: 40,
+        angle: 60,
+        spread: 55,
+        origin: { x: x - 0.1, y },
+        colors: ["#7c3aed", "#ec4899", "#f59e0b"],
+        scalar: 0.9,
+      });
+      confetti({
+        particleCount: 40,
+        angle: 120,
+        spread: 55,
+        origin: { x: x + 0.1, y },
+        colors: ["#7c3aed", "#06b6d4", "#10b981"],
+        scalar: 0.9,
+      });
+    }, 150);
+    setTimeout(() => {
+      confetti({
+        particleCount: 30,
+        spread: 100,
+        origin: { x, y: y - 0.1 },
+        colors: ["#ffffff", "#c4b5fd", "#a78bfa"],
+        scalar: 0.6,
+        ticks: 150,
+      });
+    }, 300);
+  } catch (e) {
+    console.log("Confetti not available:", e);
+  }
 }
 
 export default function NoteInput({
@@ -116,12 +114,15 @@ export default function NoteInput({
             .filter(Boolean),
         }),
       });
-      if (!res.ok)
-        throw new Error((await res.json()).error || "Failed to save");
 
-      // Check if this is the first ever memory
-      const isFirstMemory = !localStorage.getItem("engram_first_saved");
-      if (isFirstMemory) {
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || "Failed to save");
+      }
+
+      // Fire confetti on very first save
+      const isFirst = !localStorage.getItem("engram_first_saved");
+      if (isFirst) {
         localStorage.setItem("engram_first_saved", "true");
         fireConfetti(btnRef.current);
       }
@@ -149,7 +150,6 @@ export default function NoteInput({
           : "border-gray-100 hover:border-gray-200"
       }`}
     >
-      {/* Gradient top bar */}
       <div
         className={`h-1.5 rounded-t-3xl bg-gradient-to-r ${active.color} transition-all duration-300`}
       />
