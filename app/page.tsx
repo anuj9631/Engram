@@ -193,7 +193,7 @@ export default function LandingPage() {
           </div>
 
           {/* Floating UI preview */}
-          <div className="animate-fade-up delay-300 relative">
+          <div className="animate-fade-up delay-300 relative overflow-hidden sm:overflow-visible">
             <div className="animate-float">
               <div className="glass rounded-3xl p-6 shadow-2xl shadow-violet-200/40">
                 <div className="flex items-center gap-2 mb-5">
