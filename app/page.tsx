@@ -241,7 +241,7 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
-              <div className="absolute -top-4 -right-4 bg-white rounded-2xl px-4 py-2 shadow-xl border border-violet-100">
+              <div className="hidden sm:block absolute -top-4 -right-4 bg-white rounded-2xl px-4 py-2 shadow-xl border border-violet-100">
                 <div className="flex items-center gap-2">
                   <span>🎯</span>
                   <span className="text-xs font-semibold text-gray-700">
@@ -249,7 +249,7 @@ export default function LandingPage() {
                   </span>
                 </div>
               </div>
-              <div className="absolute -bottom-4 -left-4 glass rounded-2xl px-4 py-2 shadow-lg">
+              <div className="hidden sm:block absolute -bottom-4 -left-4 glass rounded-2xl px-4 py-2 shadow-lg">
                 <div className="flex items-center gap-2">
                   <span>⚡</span>
                   <span className="text-xs font-semibold text-gray-700">
