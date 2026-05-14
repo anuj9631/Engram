@@ -153,7 +153,7 @@ export default function LandingPage() {
       {/* ── NAVBAR ── */}
       <Navbar />
       {/* ── HERO ── */}
-      <section className="relative min-h-screen gradient-bg flex items-center overflow-hidden pt-16">
+      <section className="relative min-h-screen gradient-bg flex flex-col items-center overflow-hidden pt-16">
         <div className="absolute top-20 left-10 w-72 h-72 bg-violet-300/30 rounded-full blur-3xl animate-pulse-slow" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-300/25 rounded-full blur-3xl animate-pulse-slow" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-200/20 rounded-full blur-3xl" />
@@ -262,7 +262,7 @@ export default function LandingPage() {
         </div>
 
         {/* Stats bar */}
-        <div className="absolute bottom-0 left-0 right-0 glass border-t border-white/40">
+        <div className="w-full glass border-t border-white/40 mt-16 lg:mt-0">
           <div className="max-w-6xl mx-auto px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
             {STATS.map((s) => (
               <div key={s.label} className="text-center">
