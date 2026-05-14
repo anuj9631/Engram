@@ -6,6 +6,7 @@ import Logo from "@/components/Logo";
 import SignInModal from "@/components/SignInModal";
 import ThemeToggle from "@/components/ThemeToggle";
 import { supabase, signOut } from "@/lib/supabase";
+import { useTheme } from "next-themes";
 
 const LINKS = [
   { label: "Features", href: "#features" },
@@ -20,6 +21,8 @@ type User = {
 
 export default function Navbar() {
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const dark = resolvedTheme === "dark";
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -126,7 +129,7 @@ export default function Navbar() {
             href="/"
             style={{ textDecoration: "none", color: "inherit", flexShrink: 0 }}
           >
-            <Logo size="md" />
+            <Logo size="md" white={dark} />
           </Link>
 
           {/* Desktop nav links */}
