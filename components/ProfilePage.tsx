@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { Memory, supabase } from "@/lib/supabase";
 
 const DOMAINS = [
@@ -28,6 +29,40 @@ type Props = {
 };
 
 export default function ProfilePage({ memories, userId }: Props) {
+  const { theme } = useTheme();
+  const dark = theme === "dark";
+
+  // ── colour palette ──────────────────────────────────────────
+  const c = {
+    pageBg: dark ? "#0f172a" : "transparent",
+    card: dark ? "#1e293b" : "#f8fafc",
+    cardBorder: dark ? "#334155" : "#f1f5f9",
+    exportCard: dark ? "#1e293b" : "#ffffff",
+    exportBorder: dark ? "#334155" : "#f1f5f9",
+    input: dark ? "#1e293b" : "#ffffff",
+    inputBorder: dark ? "#475569" : "#e2e8f0",
+    inputText: dark ? "#f1f5f9" : "#0f172a",
+    label: dark ? "#94a3b8" : "#64748b",
+    text: dark ? "#f1f5f9" : "#0f172a",
+    subtext: dark ? "#94a3b8" : "#64748b",
+    domainBg: dark ? "#0f172a" : "#fafafa",
+    domainSel: dark ? "#2e1065" : "#f5f3ff",
+    domainBorder: dark ? "#475569" : "#e2e8f0",
+    tabBg: dark ? "#1e293b" : "#f8fafc",
+    tabActive: dark ? "#0f172a" : "#ffffff",
+    tabBorder: dark ? "#334155" : "#f1f5f9",
+    dangerCard: dark ? "#1e293b" : "#ffffff",
+    dangerBorder: dark ? "#7f1d1d" : "#fee2e2",
+    dangerBtn: dark ? "#2d0a0a" : "#fff5f5",
+    dangerBtnBorder: dark ? "#ef4444" : "#fca5a5",
+    iconYellow: dark ? "#2d2000" : "#fef3c7",
+    iconGreen: dark ? "#052e16" : "#f0fdf4",
+    dlBtn: dark ? "#1e293b" : "#ffffff",
+    dlBtnBorder: dark ? "#475569" : "#e2e8f0",
+    dlBtnText: dark ? "#e2e8f0" : "#374151",
+  };
+  // ────────────────────────────────────────────────────────────
+
   const [profile, setProfile] = useState<Profile>({
     name: "",
     role: "",
@@ -42,18 +77,16 @@ export default function ProfilePage({ memories, userId }: Props) {
   const [error, setError] = useState("");
   const [tab, setTab] = useState<"profile" | "export">("profile");
 
-  // Load profile from Supabase on mount
   useEffect(() => {
     const loadProfile = async () => {
       if (!userId) return;
       setLoading(true);
       try {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from("profiles")
           .select("full_name, role, bio, goals, strengths, domains")
           .eq("id", userId)
           .single();
-
         if (data) {
           setProfile({
             name: data.full_name || "",
@@ -88,7 +121,6 @@ export default function ProfilePage({ memories, userId }: Props) {
     setSaved(false);
   };
 
-  // Save profile to Supabase permanently
   const handleSave = async () => {
     setSaving(true);
     setError("");
@@ -102,9 +134,7 @@ export default function ProfilePage({ memories, userId }: Props) {
         strengths: profile.strengths,
         domains: profile.domains,
       });
-
       if (error) throw error;
-
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (e: any) {
@@ -173,6 +203,30 @@ export default function ProfilePage({ memories, userId }: Props) {
         .slice(0, 2)
     : "ME";
 
+  // shared styles for inputs / textareas
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "11px 14px",
+    borderRadius: 14,
+    border: `2px solid ${c.inputBorder}`,
+    fontSize: 14,
+    outline: "none",
+    color: c.inputText,
+    background: c.input,
+    fontFamily: "inherit",
+    boxSizing: "border-box",
+    transition: "border-color 0.2s",
+  };
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    fontSize: 11,
+    fontWeight: 700,
+    color: c.label,
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+    marginBottom: 6,
+  };
+
   if (loading) {
     return (
       <div
@@ -194,7 +248,7 @@ export default function ProfilePage({ memories, userId }: Props) {
             animation: "spin 0.8s linear infinite",
           }}
         />
-        <span style={{ fontSize: 14, color: "#94a3b8" }}>
+        <span style={{ fontSize: 14, color: c.subtext }}>
           Loading your profile...
         </span>
         <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
@@ -203,8 +257,15 @@ export default function ProfilePage({ memories, userId }: Props) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Header card */}
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+        background: c.pageBg,
+      }}
+    >
+      {/* ── Header card ── */}
       <div
         style={{
           background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
@@ -270,14 +331,14 @@ export default function ProfilePage({ memories, userId }: Props) {
         </div>
       </div>
 
-      {/* Tab switcher */}
+      {/* ── Tab switcher ── */}
       <div
         style={{
           display: "flex",
-          background: "#f8fafc",
+          background: c.tabBg,
           borderRadius: 16,
           padding: 4,
-          border: "1px solid #f1f5f9",
+          border: `1px solid ${c.tabBorder}`,
         }}
       >
         {[
@@ -292,10 +353,10 @@ export default function ProfilePage({ memories, userId }: Props) {
               padding: "10px 0",
               borderRadius: 12,
               border: "none",
-              background: tab === t.id ? "#fff" : "transparent",
+              background: tab === t.id ? c.tabActive : "transparent",
               fontSize: 13,
               fontWeight: 600,
-              color: tab === t.id ? "#7c3aed" : "#64748b",
+              color: tab === t.id ? "#7c3aed" : c.subtext,
               cursor: "pointer",
               boxShadow: tab === t.id ? "0 2px 8px rgba(0,0,0,0.06)" : "none",
               transition: "all 0.2s",
@@ -306,207 +367,81 @@ export default function ProfilePage({ memories, userId }: Props) {
         ))}
       </div>
 
-      {/* Profile tab */}
+      {/* ── Profile tab ── */}
       {tab === "profile" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {/* Name + Role row */}
           <div
             style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
           >
             <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "#64748b",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                  marginBottom: 6,
-                }}
-              >
-                Full name
-              </label>
+              <label style={labelStyle}>Full name</label>
               <input
                 value={profile.name}
                 onChange={(e) => update("name", e.target.value)}
                 placeholder="Arjun Sharma"
-                style={{
-                  width: "100%",
-                  padding: "11px 14px",
-                  borderRadius: 14,
-                  border: "2px solid #e2e8f0",
-                  fontSize: 14,
-                  outline: "none",
-                  color: "#0f172a",
-                  fontFamily: "inherit",
-                  boxSizing: "border-box",
-                  transition: "border-color 0.2s",
-                }}
+                style={inputStyle}
                 onFocus={(e) => (e.target.style.borderColor = "#a78bfa")}
-                onBlur={(e) => (e.target.style.borderColor = "#e2e8f0")}
+                onBlur={(e) => (e.target.style.borderColor = c.inputBorder)}
               />
             </div>
             <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "#64748b",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                  marginBottom: 6,
-                }}
-              >
-                Role / Title
-              </label>
+              <label style={labelStyle}>Role / Title</label>
               <input
                 value={profile.role}
                 onChange={(e) => update("role", e.target.value)}
                 placeholder="CS Student / Developer"
-                style={{
-                  width: "100%",
-                  padding: "11px 14px",
-                  borderRadius: 14,
-                  border: "2px solid #e2e8f0",
-                  fontSize: 14,
-                  outline: "none",
-                  color: "#0f172a",
-                  fontFamily: "inherit",
-                  boxSizing: "border-box",
-                  transition: "border-color 0.2s",
-                }}
+                style={inputStyle}
                 onFocus={(e) => (e.target.style.borderColor = "#a78bfa")}
-                onBlur={(e) => (e.target.style.borderColor = "#e2e8f0")}
+                onBlur={(e) => (e.target.style.borderColor = c.inputBorder)}
               />
             </div>
           </div>
 
+          {/* Bio */}
           <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: 11,
-                fontWeight: 700,
-                color: "#64748b",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                marginBottom: 6,
-              }}
-            >
-              Bio
-            </label>
+            <label style={labelStyle}>Bio</label>
             <textarea
               value={profile.bio}
               onChange={(e) => update("bio", e.target.value)}
               placeholder="Tell Engram about yourself..."
               rows={3}
-              style={{
-                width: "100%",
-                padding: "11px 14px",
-                borderRadius: 14,
-                border: "2px solid #e2e8f0",
-                fontSize: 14,
-                outline: "none",
-                resize: "none",
-                color: "#0f172a",
-                fontFamily: "inherit",
-                lineHeight: 1.6,
-                boxSizing: "border-box",
-                transition: "border-color 0.2s",
-              }}
+              style={{ ...inputStyle, resize: "none", lineHeight: 1.6 }}
               onFocus={(e) => (e.target.style.borderColor = "#a78bfa")}
-              onBlur={(e) => (e.target.style.borderColor = "#e2e8f0")}
+              onBlur={(e) => (e.target.style.borderColor = c.inputBorder)}
             />
           </div>
 
+          {/* Goals */}
           <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: 11,
-                fontWeight: 700,
-                color: "#64748b",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                marginBottom: 6,
-              }}
-            >
-              Goals
-            </label>
+            <label style={labelStyle}>Goals</label>
             <textarea
               value={profile.goals}
               onChange={(e) => update("goals", e.target.value)}
               placeholder="Get a job at a top tech company, build an AI startup..."
               rows={2}
-              style={{
-                width: "100%",
-                padding: "11px 14px",
-                borderRadius: 14,
-                border: "2px solid #e2e8f0",
-                fontSize: 14,
-                outline: "none",
-                resize: "none",
-                color: "#0f172a",
-                fontFamily: "inherit",
-                lineHeight: 1.6,
-                boxSizing: "border-box",
-                transition: "border-color 0.2s",
-              }}
+              style={{ ...inputStyle, resize: "none", lineHeight: 1.6 }}
               onFocus={(e) => (e.target.style.borderColor = "#a78bfa")}
-              onBlur={(e) => (e.target.style.borderColor = "#e2e8f0")}
+              onBlur={(e) => (e.target.style.borderColor = c.inputBorder)}
             />
           </div>
 
+          {/* Strengths */}
           <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: 11,
-                fontWeight: 700,
-                color: "#64748b",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                marginBottom: 6,
-              }}
-            >
-              Strengths
-            </label>
+            <label style={labelStyle}>Strengths</label>
             <input
               value={profile.strengths}
               onChange={(e) => update("strengths", e.target.value)}
               placeholder="Python, React, System Design..."
-              style={{
-                width: "100%",
-                padding: "11px 14px",
-                borderRadius: 14,
-                border: "2px solid #e2e8f0",
-                fontSize: 14,
-                outline: "none",
-                color: "#0f172a",
-                fontFamily: "inherit",
-                boxSizing: "border-box",
-                transition: "border-color 0.2s",
-              }}
+              style={inputStyle}
               onFocus={(e) => (e.target.style.borderColor = "#a78bfa")}
-              onBlur={(e) => (e.target.style.borderColor = "#e2e8f0")}
+              onBlur={(e) => (e.target.style.borderColor = c.inputBorder)}
             />
           </div>
 
+          {/* Domains */}
           <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: 11,
-                fontWeight: 700,
-                color: "#64748b",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                marginBottom: 10,
-              }}
-            >
-              Domains
-            </label>
+            <label style={{ ...labelStyle, marginBottom: 10 }}>Domains</label>
             <div
               style={{
                 display: "grid",
@@ -525,8 +460,8 @@ export default function ProfilePage({ memories, userId }: Props) {
                       borderRadius: 12,
                       border: selected
                         ? "2px solid #7c3aed"
-                        : "2px solid #e2e8f0",
-                      background: selected ? "#f5f3ff" : "#fafafa",
+                        : `2px solid ${c.domainBorder}`,
+                      background: selected ? c.domainSel : c.domainBg,
                       cursor: "pointer",
                       textAlign: "center",
                       transition: "all 0.15s",
@@ -539,7 +474,7 @@ export default function ProfilePage({ memories, userId }: Props) {
                       style={{
                         fontSize: 11,
                         fontWeight: 600,
-                        color: selected ? "#7c3aed" : "#475569",
+                        color: selected ? "#a78bfa" : c.subtext,
                         lineHeight: 1.2,
                       }}
                     >
@@ -551,6 +486,7 @@ export default function ProfilePage({ memories, userId }: Props) {
             </div>
           </div>
 
+          {/* Error */}
           {error && (
             <div
               style={{
@@ -566,6 +502,7 @@ export default function ProfilePage({ memories, userId }: Props) {
             </div>
           )}
 
+          {/* Save button */}
           <button
             onClick={handleSave}
             disabled={saving}
@@ -619,7 +556,7 @@ export default function ProfilePage({ memories, userId }: Props) {
             style={{
               textAlign: "center",
               fontSize: 12,
-              color: "#94a3b8",
+              color: c.subtext,
               marginTop: -8,
             }}
           >
@@ -628,28 +565,29 @@ export default function ProfilePage({ memories, userId }: Props) {
         </div>
       )}
 
-      {/* Export tab */}
+      {/* ── Export tab ── */}
       {tab === "export" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {/* Stats summary */}
           <div
             style={{
-              background: "#f8fafc",
+              background: c.card,
               borderRadius: 16,
               padding: "16px 20px",
-              border: "1px solid #f1f5f9",
+              border: `1px solid ${c.cardBorder}`,
             }}
           >
             <div
               style={{
                 fontSize: 13,
                 fontWeight: 600,
-                color: "#0f172a",
+                color: c.text,
                 marginBottom: 4,
               }}
             >
               Your data
             </div>
-            <div style={{ fontSize: 13, color: "#64748b" }}>
+            <div style={{ fontSize: 13, color: c.subtext }}>
               {memories.length} memories ·{" "}
               {memories
                 .reduce((a, m) => a + m.content.split(" ").length, 0)
@@ -658,12 +596,13 @@ export default function ProfilePage({ memories, userId }: Props) {
             </div>
           </div>
 
+          {/* Export options */}
           {[
             {
               icon: "📦",
               title: "Export as JSON",
               desc: "Full export with all memory data, tags, timestamps, and profile. Perfect for backup.",
-              color: "#fef3c7",
+              iconBg: c.iconYellow,
               fn: exportJSON,
               file: ".json",
               hover: "#7c3aed",
@@ -672,7 +611,7 @@ export default function ProfilePage({ memories, userId }: Props) {
               icon: "📝",
               title: "Export as Markdown",
               desc: "All memories formatted as readable Markdown. Great for Obsidian or Notion import.",
-              color: "#f0fdf4",
+              iconBg: c.iconGreen,
               fn: exportMarkdown,
               file: ".md",
               hover: "#10b981",
@@ -681,8 +620,8 @@ export default function ProfilePage({ memories, userId }: Props) {
             <div
               key={item.title}
               style={{
-                background: "#fff",
-                border: "1.5px solid #f1f5f9",
+                background: c.exportCard,
+                border: `1.5px solid ${c.exportBorder}`,
                 borderRadius: 20,
                 padding: "20px",
               }}
@@ -695,7 +634,7 @@ export default function ProfilePage({ memories, userId }: Props) {
                     width: 42,
                     height: 42,
                     borderRadius: 12,
-                    background: item.color,
+                    background: item.iconBg,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -710,7 +649,7 @@ export default function ProfilePage({ memories, userId }: Props) {
                     style={{
                       fontSize: 14,
                       fontWeight: 700,
-                      color: "#0f172a",
+                      color: c.text,
                       marginBottom: 4,
                     }}
                   >
@@ -719,7 +658,7 @@ export default function ProfilePage({ memories, userId }: Props) {
                   <div
                     style={{
                       fontSize: 13,
-                      color: "#64748b",
+                      color: c.subtext,
                       marginBottom: 14,
                       lineHeight: 1.5,
                     }}
@@ -731,11 +670,11 @@ export default function ProfilePage({ memories, userId }: Props) {
                     style={{
                       padding: "9px 18px",
                       borderRadius: 12,
-                      border: "1.5px solid #e2e8f0",
-                      background: "#fff",
+                      border: `1.5px solid ${c.dlBtnBorder}`,
+                      background: c.dlBtn,
                       fontSize: 13,
                       fontWeight: 600,
-                      color: "#374151",
+                      color: c.dlBtnText,
                       cursor: "pointer",
                       transition: "all 0.15s",
                     }}
@@ -744,8 +683,8 @@ export default function ProfilePage({ memories, userId }: Props) {
                       e.currentTarget.style.color = item.hover;
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "#e2e8f0";
-                      e.currentTarget.style.color = "#374151";
+                      e.currentTarget.style.borderColor = c.dlBtnBorder;
+                      e.currentTarget.style.color = c.dlBtnText;
                     }}
                   >
                     Download {item.file}
@@ -755,10 +694,11 @@ export default function ProfilePage({ memories, userId }: Props) {
             </div>
           ))}
 
+          {/* Danger zone */}
           <div
             style={{
-              background: "#fff",
-              border: "1.5px solid #fee2e2",
+              background: c.dangerCard,
+              border: `1.5px solid ${c.dangerBorder}`,
               borderRadius: 20,
               padding: "20px",
             }}
@@ -767,13 +707,13 @@ export default function ProfilePage({ memories, userId }: Props) {
               style={{
                 fontSize: 13,
                 fontWeight: 700,
-                color: "#dc2626",
+                color: "#ef4444",
                 marginBottom: 8,
               }}
             >
               Danger zone
             </div>
-            <div style={{ fontSize: 13, color: "#64748b", marginBottom: 14 }}>
+            <div style={{ fontSize: 13, color: c.subtext, marginBottom: 14 }}>
               Clear onboarding state stored locally on this device.
             </div>
             <button
@@ -788,11 +728,11 @@ export default function ProfilePage({ memories, userId }: Props) {
               style={{
                 padding: "9px 18px",
                 borderRadius: 12,
-                border: "1.5px solid #fca5a5",
-                background: "#fff5f5",
+                border: `1.5px solid ${c.dangerBtnBorder}`,
+                background: c.dangerBtn,
                 fontSize: 13,
                 fontWeight: 600,
-                color: "#dc2626",
+                color: "#ef4444",
                 cursor: "pointer",
               }}
             >
