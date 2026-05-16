@@ -131,72 +131,7 @@ OPENAI_API_KEY=your_openai_key
 ANTHROPIC_API_KEY=your_anthropic_key
 ```
 
-### 3. Set up Supabase
 
-Run these SQL commands in your Supabase SQL editor:
-
-```sql
--- Enable pgvector
-create extension if not exists vector;
-
--- Memories table
-create table memories (
-  id           uuid default gen_random_uuid() primary key,
-  user_id      uuid references auth.users not null,
-  title        text,
-  content      text not null,
-  source_type  text default 'note',
-  tags         text[] default '{}',
-  embedding    vector(1536),
-  created_at   timestamptz default now()
-);
-
--- Profiles table
-create table profiles (
-  id           uuid references auth.users primary key,
-  full_name    text,
-  role         text,
-  bio          text,
-  goals        text,
-  strengths    text,
-  domains      text[] default '{}'
-);
-
--- Vector similarity search function
-create or replace function match_memories(
-  query_embedding vector(1536),
-  match_user_id   uuid,
-  match_count     int default 5
-)
-returns table (
-  id          uuid,
-  title       text,
-  content     text,
-  source_type text,
-  tags        text[],
-  similarity  float
-)
-language sql stable as $$
-  select
-    id, title, content, source_type, tags,
-    1 - (embedding <=> query_embedding) as similarity
-  from memories
-  where user_id = match_user_id
-    and embedding is not null
-  order by embedding <=> query_embedding
-  limit match_count;
-$$;
-
--- Row Level Security
-alter table memories  enable row level security;
-alter table profiles  enable row level security;
-
-create policy "Users can manage their own memories"
-  on memories for all using (auth.uid() = user_id);
-
-create policy "Users can manage their own profile"
-  on profiles for all using (auth.uid() = id);
-```
 
 ### 4. Run locally
 
