@@ -71,28 +71,6 @@ next-themes       Realtime Auth        Claude API (AI chatbot)
 
 <br />
 
-## 📸 Screenshots
-
-<table>
-  <tr>
-    <td align="center"><b>🏠 Landing Page</b></td>
-    <td align="center"><b>📚 Dashboard</b></td>
-  </tr>
-  <tr>
-    <td><img src="./public/screenshots/landing.png" alt="Landing" width="400"/></td>
-    <td><img src="./public/screenshots/dashboard.png" alt="Dashboard" width="400"/></td>
-  </tr>
-  <tr>
-    <td align="center"><b>🤖 AI Chat</b></td>
-    <td align="center"><b>👤 Profile</b></td>
-  </tr>
-  <tr>
-    <td><img src="./public/screenshots/chat.png" alt="AI Chat" width="400"/></td>
-    <td><img src="./public/screenshots/profile.png" alt="Profile" width="400"/></td>
-  </tr>
-</table>
-
-<br />
 
 ## 🚀 How It Works
 
